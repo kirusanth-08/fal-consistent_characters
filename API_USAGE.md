@@ -9,8 +9,7 @@
   "prompt": "Make this person on the image standing on a ground between flower plants",
   "image_url": "https://example.com/character.jpg",
   "seed": 148059131098564,
-  "width": 3072,
-  "height": 3072
+  "resolution": "square"
 }
 ```
 
@@ -29,8 +28,7 @@
   "prompt": "Make this person on the image standing on a ground between flower plants",
   "image_url": "https://example.com/character.jpg",
   "seed": 148059131098564,
-  "width": 3072,
-  "height": 3072,
+  "resolution": "square",
   "nsfw": false
 }
 ```
@@ -42,8 +40,7 @@
 | `prompt` | string | ✅ Yes | - | Text prompt for image generation (controls scene, pose, etc.) |
 | `image_url` | string | ✅ Yes | - | URL of the input character/person image |
 | `seed` | integer | ✅ Yes | - | Random seed for reproducible generation |
-| `width` | integer | ✅ Yes | - | Width in pixels (512-4096) |
-| `height` | integer | ✅ Yes | - | Height in pixels (512-4096) |
+| `resolution` | string | ❌ No | `"square"` | Resolution preset (see presets below) |
 | `nsfw` | boolean | ❌ No | `false` | Enable NSFW mode (sets LoRA strength to 1.0 if true, 0.0 if false) |
 
 ## Fixed Workflow Parameters
@@ -68,8 +65,7 @@ curl -X POST https://queue.fal.run/YOUR_TEAM/your-app-id/ \
     "prompt": "Make this person on the image standing on a ground between flower plants",
     "image_url": "https://example.com/character.jpg",
     "seed": 148059131098564,
-    "width": 3072,
-    "height": 3072,
+    "resolution": "square",
     "nsfw": false
   }'
 ```
@@ -85,8 +81,7 @@ result = fal_client.submit(
         "prompt": "Make this person on the image standing on a ground between flower plants",
         "image_url": "https://example.com/character.jpg",
         "seed": 148059131098564,
-        "width": 3072,
-        "height": 3072,
+        "resolution": "square",
         "nsfw": False
     }
 )
@@ -105,8 +100,8 @@ print(result)
       "content_type": "image/png",
       "file_name": "output.png",
       "file_size": 2185448,
-      "width": 3072,
-      "height": 3072
+      "width": 1024,
+      "height": 1024
     }
   ]
 }
@@ -118,11 +113,35 @@ print(result)
 - `42` - Simple reproducible seed
 - `12345` - Another common test seed
 
-## Recommended Dimensions
+## Resolution Quick Examples
 
-- **High Quality**: 3072x3072 (default)
-- **Standard**: 1024x1024
-- **Fast**: 512x512
+**Square Image (Social Media)**
+```json
+{
+  "resolution": "square"
+}
+```
+
+**Portrait (3:4)**
+```json
+{
+  "resolution": "portrait_3_4"
+}
+```
+
+**Landscape (16:9 - Widescreen)**
+```json
+{
+  "resolution": "landscape_16_9"
+}
+```
+
+**HD Mobile Portrait**
+```json
+{
+  "resolution": "hd"
+}
+```
 
 ## NSFW Mode
 

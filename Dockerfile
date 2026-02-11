@@ -69,10 +69,11 @@ RUN git clone https://github.com/kijai/ComfyUI-KJNodes.git /comfyui/custom_nodes
     && cd /comfyui/custom_nodes/ComfyUI-KJNodes && git checkout 50a0837f9aea602b184bbf6dbabf66ed2c7a1d22 \
     && if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-# 4. ltdrdata/ComfyUI-Manager
-RUN git clone https://github.com/ltdrdata/ComfyUI-Manager.git /comfyui/custom_nodes/ComfyUI-Manager \
-    && cd /comfyui/custom_nodes/ComfyUI-Manager && git checkout 7b3f032e77231ccbc401e5911a3ae962be63007e \
-    && if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+# 4. ltdrdata/ComfyUI-Manager (may already exist from comfy-cli)
+RUN rm -rf /comfyui/custom_nodes/ComfyUI-Manager && \
+    git clone https://github.com/ltdrdata/ComfyUI-Manager.git /comfyui/custom_nodes/ComfyUI-Manager && \
+    cd /comfyui/custom_nodes/ComfyUI-Manager && git checkout 7b3f032e77231ccbc401e5911a3ae962be63007e && \
+    if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
 # ---------------------------------------------------------
 # fal Runtime Requirements

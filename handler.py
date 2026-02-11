@@ -100,42 +100,49 @@ class CharacterInput(BaseModel):
         ...,
         title="Prompt",
         description="Text prompt for the image generation.",
-        examples=["Make this person on the image standing on a ground between flower plants"]
+        examples=[
+            "Make this person on the image standing on a ground between flower plants",
+            "This character sitting on a modern office chair in a bright workspace",
+            "The person walking on a beach during sunset with waves in the background",
+            "This individual standing in front of a futuristic cityscape at night",
+            "The character posing in a studio with professional lighting and white background",
+            "This person in a cozy coffee shop reading a book by the window"
+        ]
     )
     image_url: str = Field(
         ...,
         title="Input Image",
         description="URL of the character image to process.",
         examples=[
-            "https://images.unsplash.com/photo-1707661553213-df6e18dd54ad?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDExfHx8ZW58MHx8fHx8"
+            "https://images.unsplash.com/photo-1707661553213-df6e18dd54ad?fm=jpg&q=60&w=3000",
+            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800",
+            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800",
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800"
         ]
     )
     seed: int = Field(
         ...,
         title="Seed",
-        description="Random seed for reproducible generation.",
-        examples=[148059131098564]
+        description="Random seed for reproducible generation. Use the same seed for consistent results."
     )
     width: int = Field(
         ...,
         title="Width",
-        description="Width of the generated image in pixels.",
+        description="Width of the generated image in pixels. Higher values = better quality but slower.",
         ge=512,
-        le=4096,
-        examples=[3072]
+        le=4096
     )
     height: int = Field(
         ...,
         title="Height",
-        description="Height of the generated image in pixels.",
+        description="Height of the generated image in pixels. Higher values = better quality but slower.",
         ge=512,
-        le=4096,
-        examples=[3072]
+        le=4096
     )
     nsfw: bool = Field(
         default=False,
         title="NSFW Mode",
-        description="Enable NSFW content generation. If false, NSFW LoRA strength is set to 0.",
+        description="Enable NSFW content generation. If false, NSFW LoRA strength is set to 0."
     )
 
 # -------------------------------------------------
