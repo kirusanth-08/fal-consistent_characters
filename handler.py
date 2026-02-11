@@ -96,6 +96,12 @@ def apply_fixed_values(workflow: dict, seed_value: int):
 # Input Model
 # -------------------------------------------------
 class CharacterInput(BaseModel):
+    prompt: str = Field(
+        ...,
+        title="Prompt",
+        description="Text prompt for the image generation.",
+        examples=["Make this person on the image standing on a ground between flower plants"]
+    )
     image_url: str = Field(
         ...,
         title="Input Image",
@@ -104,10 +110,32 @@ class CharacterInput(BaseModel):
             "https://images.unsplash.com/photo-1707661553213-df6e18dd54ad?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDExfHx8ZW58MHx8fHx8"
         ]
     )
-    prompt: str = Field(
-        default="Make this person on the image standing on a ground between flower plants",
-        title="Prompt",
-        description="Text prompt for the image generation.",
+    seed: int = Field(
+        ...,
+        title="Seed",
+        description="Random seed for reproducible generation.",
+        examples=[148059131098564]
+    )
+    width: int = Field(
+        ...,
+        title="Width",
+        description="Width of the generated image in pixels.",
+        ge=512,
+        le=4096,
+        examples=[3072]
+    )
+    height: int = Field(
+        ...,
+        title="Height",
+        description="Height of the generated image in pixels.",
+        ge=512,
+        le=4096,
+        examples=[3072]
+    )
+    nsfw: bool = Field(
+        default=False,
+        title="NSFW Mode",
+        description="Enable NSFW content generation. If false, NSFW LoRA strength is set to 0.",
     )
 
 # -------------------------------------------------
@@ -178,14 +206,22 @@ class ConsistentCharacter(fal.App):
                 {"name": input_img, "image": image_url_to_base64(input.image_url)}
             ])
 
-            # Update workflow with input image
+            # Update workflow with input image (node 125)
             workflow["125"]["inputs"]["image"] = input_img
 
-            # Update prompt
+            # Update prompt (node 119)
             workflow["119"]["inputs"]["text"] = input.prompt
 
-            seed_value = random.randint(0, 2**63 - 1)
-            apply_fixed_values(workflow, seed_value)
+            # Update seed (node 109)
+            workflow["109"]["inputs"]["noise_seed"] = input.seed
+
+            # Update width and height (node 102)
+            workflow["102"]["inputs"]["width"] = input.width
+            workflow["102"]["inputs"]["height"] = input.height
+
+            # Update NSFW LoRA strength (node 116)
+            lora_strength = 1.0 if input.nsfw else 0.0
+            workflow["116"]["inputs"]["strength_model"] = lora_strength
 
             # Run ComfyUI
             client_id = str(uuid.uuid4())

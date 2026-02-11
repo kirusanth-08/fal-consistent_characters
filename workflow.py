@@ -224,7 +224,7 @@ WORKFLOW_JSON={
       "116": {
         "inputs": {
           "lora_name": "Flux Klein - NSFW v2.safetensors",
-          "strength_model": 0.2,
+          "strength_model": 0.0,
           "model": [
             "113",
             0
@@ -249,7 +249,7 @@ WORKFLOW_JSON={
       },
       "119": {
         "inputs": {
-          "text": "Make this person on the image standing on a ground between flower plants",
+          "text": "Make this person on the image standing on a ground between flower plants ",
           "clip": [
             "100",
             0
@@ -275,7 +275,7 @@ WORKFLOW_JSON={
       },
       "125": {
         "inputs": {
-          "image": "input_image"
+          "image": "input_image.png"
         },
         "class_type": "LoadImage",
         "_meta": {
