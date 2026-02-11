@@ -5,74 +5,105 @@ WORKFLOW_JSON={
     "customModels": [],
     "images": [],
     "workflow": {
-      "1": {
+      "99": {
         "inputs": {
-          "strength": 1,
-          "model": [
-            "2",
+          "noise": [
+            "109",
+            0
+          ],
+          "guider": [
+            "110",
+            0
+          ],
+          "sampler": [
+            "111",
+            0
+          ],
+          "sigmas": [
+            "103",
+            0
+          ],
+          "latent_image": [
+            "102",
             0
           ]
         },
-        "class_type": "CFGNorm",
+        "class_type": "SamplerCustomAdvanced",
         "_meta": {
-          "title": "CFGNorm"
+          "title": "SamplerCustomAdvanced"
         }
       },
-      "2": {
+      "100": {
         "inputs": {
-          "shift": 3,
-          "model": [
-            "20",
+          "clip_name": "qwen_3_8b_fp8mixed.safetensors",
+          "type": "flux2",
+          "device": "default"
+        },
+        "class_type": "CLIPLoader",
+        "_meta": {
+          "title": "Load CLIP"
+        }
+      },
+      "101": {
+        "inputs": {
+          "vae_name": "flux2-vae.safetensors"
+        },
+        "class_type": "VAELoader",
+        "_meta": {
+          "title": "Load VAE"
+        }
+      },
+      "102": {
+        "inputs": {
+          "width": 3072,
+          "height": 3072,
+          "batch_size": 1
+        },
+        "class_type": "EmptyFlux2LatentImage",
+        "_meta": {
+          "title": "Empty Flux 2 Latent"
+        }
+      },
+      "103": {
+        "inputs": {
+          "steps": 4,
+          "width": [
+            "117",
+            0
+          ],
+          "height": [
+            "117",
+            1
+          ]
+        },
+        "class_type": "Flux2Scheduler",
+        "_meta": {
+          "title": "Flux2Scheduler"
+        }
+      },
+      "104": {
+        "inputs": {
+          "upscale_method": "nearest-exact",
+          "megapixels": 1,
+          "resolution_steps": 1,
+          "image": [
+            "125",
             0
           ]
         },
-        "class_type": "ModelSamplingAuraFlow",
+        "class_type": "ImageScaleToTotalPixels",
         "_meta": {
-          "title": "ModelSamplingAuraFlow"
+          "title": "ImageScaleToTotalPixels"
         }
       },
-      "3": {
-        "inputs": {
-          "prompt": "Dont change the background of the image 1 and dont zoom or change the size of image. Don't change the texture of the image",
-          "clip": [
-            "96",
-            0
-          ],
-          "vae": [
-            "22",
-            0
-          ],
-          "image1": [
-            "39",
-            0
-          ],
-          "image2": [
-            "40",
-            0
-          ]
-        },
-        "class_type": "TextEncodeQwenImageEditPlus",
-        "_meta": {
-          "title": "TextEncodeQwenImageEditPlus"
-        }
-      },
-      "7": {
-        "inputs": {
-          "image": "reference_image"
-        },
-        "class_type": "LoadImage",
-        "_meta": {
-          "title": "Load Image"
-        }
-      },
-      "10": {
+      "105": {
         "inputs": {
           "pixels": [
-            "39",
+            "104",
             0
           ],
           "vae": [
-            "22",
+            "101",
             0
           ]
         },
@@ -81,39 +112,14 @@ WORKFLOW_JSON={
           "title": "VAE Encode"
         }
       },
-      "11": {
-        "inputs": {
-          "prompt": "Relight Figure 1 using the brightness map from Figure 2 (light source from the front)",
-          "clip": [
-            "96",
-            0
-          ],
-          "vae": [
-            "22",
-            0
-          ],
-          "image1": [
-            "39",
-            0
-          ],
-          "image2": [
-            "40",
-            0
-          ]
-        },
-        "class_type": "TextEncodeQwenImageEditPlus",
-        "_meta": {
-          "title": "TextEncodeQwenImageEditPlus"
-        }
-      },
-      "12": {
+      "106": {
         "inputs": {
           "samples": [
-            "14",
+            "99",
             0
           ],
           "vae": [
-            "22",
+            "101",
             0
           ]
         },
@@ -122,115 +128,80 @@ WORKFLOW_JSON={
           "title": "VAE Decode"
         }
       },
-      "14": {
+      "107": {
         "inputs": {
-          "seed": 452037337342133,
-          "steps": 8,
+          "conditioning": [
+            "119",
+            0
+          ],
+          "latent": [
+            "105",
+            0
+          ]
+        },
+        "class_type": "ReferenceLatent",
+        "_meta": {
+          "title": "ReferenceLatent"
+        }
+      },
+      "108": {
+        "inputs": {
+          "conditioning": [
+            "115",
+            0
+          ],
+          "latent": [
+            "105",
+            0
+          ]
+        },
+        "class_type": "ReferenceLatent",
+        "_meta": {
+          "title": "ReferenceLatent"
+        }
+      },
+      "109": {
+        "inputs": {
+          "noise_seed": 148059131098564
+        },
+        "class_type": "RandomNoise",
+        "_meta": {
+          "title": "RandomNoise"
+        }
+      },
+      "110": {
+        "inputs": {
           "cfg": 1,
-          "sampler_name": "euler",
-          "scheduler": "simple",
-          "denoise": 1,
           "model": [
-            "1",
+            "116",
             0
           ],
           "positive": [
-            "11",
+            "107",
             0
           ],
           "negative": [
-            "3",
-            0
-          ],
-          "latent_image": [
-            "10",
+            "108",
             0
           ]
         },
-        "class_type": "KSampler",
+        "class_type": "CFGGuider",
         "_meta": {
-          "title": "KSampler"
+          "title": "CFGGuider"
         }
       },
-      "20": {
+      "111": {
         "inputs": {
-          "lora_name": "Qwen-Image-Lightning-8steps-V2.0.safetensors",
-          "strength_model": 1,
-          "model": [
-            "77",
-            0
-          ]
+          "sampler_name": "euler"
         },
-        "class_type": "LoraLoaderModelOnly",
+        "class_type": "KSamplerSelect",
         "_meta": {
-          "title": "LoraLoaderModelOnly"
+          "title": "KSamplerSelect"
         }
       },
-      "22": {
+      "113": {
         "inputs": {
-          "vae_name": "qwen_image_vae.safetensors"
-        },
-        "class_type": "VAELoader",
-        "_meta": {
-          "title": "Load VAE"
-        }
-      },
-      "31": {
-        "inputs": {
-          "image": "main_image"
-        },
-        "class_type": "LoadImage",
-        "_meta": {
-          "title": "Load Image"
-        }
-      },
-      "39": {
-        "inputs": {
-          "upscale_method": "lanczos",
-          "megapixels": 1,
-          "resolution_steps": 1,
-          "image": [
-            "31",
-            0
-          ]
-        },
-        "class_type": "ImageScaleToTotalPixels",
-        "_meta": {
-          "title": "ImageScaleToTotalPixels"
-        }
-      },
-      "40": {
-        "inputs": {
-          "upscale_method": "lanczos",
-          "megapixels": 1,
-          "resolution_steps": 1,
-          "image": [
-            "7",
-            0
-          ]
-        },
-        "class_type": "ImageScaleToTotalPixels",
-        "_meta": {
-          "title": "ImageScaleToTotalPixels"
-        }
-      },
-      "77": {
-        "inputs": {
-          "lora_name": "iclight_sd15_fc.safetensors",
-          "strength_model": 1,
-          "model": [
-            "94",
-            0
-          ]
-        },
-        "class_type": "LoraLoaderModelOnly",
-        "_meta": {
-          "title": "LoraLoaderModelOnly"
-        }
-      },
-      "94": {
-        "inputs": {
-          "unet_name": "Qwen-Image-Edit-2509_fp8_e4m3fn.safetensors",
+          "unet_name": "flux-2-klein-9b.safetensors",
           "weight_dtype": "default"
         },
         "class_type": "UNETLoader",
@@ -238,28 +209,77 @@ WORKFLOW_JSON={
           "title": "Load Diffusion Model"
         }
       },
-      "96": {
+      "115": {
         "inputs": {
-          "clip_name": "qwen_2.5_vl_7b.safetensors",
-          "type": "stable_diffusion",
-          "device": "default"
+          "conditioning": [
+            "119",
+            0
+          ]
         },
-        "class_type": "CLIPLoader",
+        "class_type": "ConditioningZeroOut",
         "_meta": {
-          "title": "Load CLIP"
+          "title": "ConditioningZeroOut"
         }
       },
-      "106": {
+      "116": {
         "inputs": {
-          "filename_prefix": "ComfyUI",
+          "lora_name": "Flux Klein - NSFW v2.safetensors",
+          "strength_model": 0.2,
+          "model": [
+            "113",
+            0
+          ]
+        },
+        "class_type": "LoraLoaderModelOnly",
+        "_meta": {
+          "title": "Load LoRA"
+        }
+      },
+      "117": {
+        "inputs": {
+          "image": [
+            "104",
+            0
+          ]
+        },
+        "class_type": "GetImageSize",
+        "_meta": {
+          "title": "Get Image Size"
+        }
+      },
+      "119": {
+        "inputs": {
+          "text": "Make this person on the image standing on a ground between flower plants",
+          "clip": [
+            "100",
+            0
+          ]
+        },
+        "class_type": "CLIPTextEncode",
+        "_meta": {
+          "title": "CLIP Text Encode (Positive Prompt)"
+        }
+      },
+      "121": {
+        "inputs": {
+          "filename_prefix": "output",
           "images": [
-            "12",
+            "106",
             0
           ]
         },
         "class_type": "SaveImage",
         "_meta": {
           "title": "Save Image"
+        }
+      },
+      "125": {
+        "inputs": {
+          "image": "input_image"
+        },
+        "class_type": "LoadImage",
+        "_meta": {
+          "title": "Load Image"
         }
       }
     }

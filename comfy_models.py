@@ -1,43 +1,38 @@
 MODEL_LIST = [
 
     # =======================================================
-    # 1. MAIN DIFFUSION MODEL (QWEN-IMAGE-EDIT)
+    # 1. MAIN DIFFUSION MODEL (FLUX 2 KLEIN)
     # =======================================================
     {
-        "url": "https://huggingface.co/Comfy-Org/Qwen-Image-Edit_ComfyUI/resolve/main/split_files/diffusion_models/qwen_image_edit_2509_fp8_e4m3fn.safetensors",
-        "path": "/data/models/diffusion_models/Qwen-Image-Edit-2509_fp8_e4m3fn.safetensors",
-        "target": "/comfyui/models/diffusion_models/Qwen-Image-Edit-2509_fp8_e4m3fn.safetensors"
+        "url": "https://huggingface.co/black-forest-labs/FLUX.2-klein-9B/resolve/main/flux-2-klein-9b.safetensors",
+        "path": "/data/models/unet/flux-2-klein-9b.safetensors",
+        "target": "/comfyui/models/unet/flux-2-klein-9b.safetensors"
     },
 
     # =======================================================
-    # 2. VAE FOR QWEN-IMAGE MODEL
+    # 2. VAE FOR FLUX 2
     # =======================================================
     {
-        "url": "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/vae/qwen_image_vae.safetensors",
-        "path": "/data/models/vae/qwen_image_vae.safetensors",
-        "target": "/comfyui/models/vae/qwen_image_vae.safetensors"
+        "url": "https://huggingface.co/Comfy-Org/flux2-dev/resolve/main/split_files/vae/flux2-vae.safetensors",
+        "path": "/data/models/vae/flux2-vae.safetensors",
+        "target": "/comfyui/models/vae/flux2-vae.safetensors"
     },
 
     # =======================================================
-    # 3. CLIP MODELS FOR QWEN-IMAGE MODEL
+    # 3. CLIP MODEL FOR FLUX 2
     # =======================================================
     {
-        "url": "https://huggingface.co/Comfy-Org/Qwen-Image_ComfyUI/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b.safetensors",
-        "path": "/data/models/text_encoders/qwen_2.5_vl_7b.safetensors",
-        "target": "/comfyui/models/text_encoders/qwen_2.5_vl_7b.safetensors"
+        "url": "https://huggingface.co/Comfy-Org/flux2-klein-9B/resolve/main/split_files/text_encoders/qwen_3_8b_fp8mixed.safetensors",
+        "path": "/data/models/clip/qwen_3_8b_fp8mixed.safetensors",
+        "target": "/comfyui/models/clip/qwen_3_8b_fp8mixed.safetensors"
     },
 
     # =======================================================
-    # 4. LORA MODELS FOR QWEN-MULTI-LIGHTING MODEL
+    # 4. LORA MODEL (NSFW)
     # =======================================================
     {
-        "url": "https://huggingface.co/lightx2v/Qwen-Image-Lightning/resolve/main/Qwen-Image-Lightning-8steps-V2.0.safetensors",
-        "path": "/data/models/loras/Qwen-Image-Lightning-8steps-V2.0.safetensors",
-        "target": "/comfyui/models/loras/Qwen-Image-Lightning-8steps-V2.0.safetensors"
-    },
-    {
-        "url": "https://huggingface.co/spaces/lllyasviel/IC-Light/resolve/main/models/iclight_sd15_fc.safetensors",
-        "path": "/data/models/loras/iclight_sd15_fc.safetensors",
-        "target": "/comfyui/models/loras/iclight_sd15_fc.safetensors"
+        "url": "https://huggingface.co/kirusanth08/flux_klein_nsfw_v2/resolve/main/Flux%20Klein%20-%20NSFW%20v2.safetensors",
+        "path": "/data/models/loras/Flux Klein - NSFW v2.safetensors",
+        "target": "/comfyui/models/loras/Flux Klein - NSFW v2.safetensors"
     }
 ]

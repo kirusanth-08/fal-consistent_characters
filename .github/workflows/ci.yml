@@ -60,7 +60,7 @@ jobs:
 
       - name: Deploy to fal
         run: |
-          fal deploy handler.py::LightPattern
+          fal deploy handler.py::ConsistentCharacter
         env:
           FAL_KEY: ${{ secrets.FAL_KEY }}
           FAL_TARGET: ${{ secrets.FAL_TARGET }}

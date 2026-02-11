@@ -38,7 +38,14 @@ def download_if_missing(url, path):
     if os.path.exists(path):
         return
     ensure_dir(path)
-    with requests.get(url, stream=True) as r:
+    
+    # Add Hugging Face authentication if HF_TOKEN_k is available
+    headers = {}
+    hf_token = os.environ.get("HF_TOKEN_k") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    if hf_token and "huggingface.co" in url:
+        headers["Authorization"] = f"Bearer {hf_token}"
+    
+    with requests.get(url, stream=True, headers=headers) as r:
         r.raise_for_status()
         with open(path, "wb") as f:
             for chunk in r.iter_content(8192):
@@ -81,63 +88,37 @@ def apply_fixed_values(workflow: dict, seed_value: int):
     for node in workflow.values():
         inputs = node.get("inputs", {})
 
-        if node.get("class_type") == "KSampler":
-            inputs["seed"] = seed_value
+        # Update RandomNoise node seed
+        if node.get("class_type") == "RandomNoise":
+            inputs["noise_seed"] = seed_value
 
 # -------------------------------------------------
-# Light Position Mapping
+# Input Model
 # -------------------------------------------------
-LIGHT_POSITION_MAP = {
-    "below": "below",
-    "ahead": "ahead",
-    "left": "the left",
-    "rear": "the rear",
-    "right_rear": "the right rear",
-    "left_rear": "the left rear"
-}
-
-from typing import Literal
-
-LightPosition = Literal[
-    "below", "ahead", "left", "rear", "right_rear",
-    "left_rear"
-]
-
-# -------------------------------------------------
-# Input Model (ONLY image inputs in UI)
-# -------------------------------------------------
-class LightPatternInput(BaseModel):
-    main_image_url: str = Field(
+class CharacterInput(BaseModel):
+    image_url: str = Field(
         ...,
-        title="Main Image",
-        description="URL of the main image to process.",
+        title="Input Image",
+        description="URL of the character image to process.",
         examples=[
-            "https://images.unsplash.com/photo-1707661553213-df6e18dd54ad?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDExfHx8ZW58MHx8fHx8",
-            "https://images.pexels.com/photos/5077664/pexels-photo-5077664.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500"
+            "https://images.unsplash.com/photo-1707661553213-df6e18dd54ad?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDExfHx8ZW58MHx8fHx8"
         ]
     )
-    reference_image_url: str = Field(
-        ...,
-        title="Reference Image",
-        description="URL of the reference image for lighting.",
-        examples=[
-            "https://images.unsplash.com/photo-1712249363853-47098b4a62ae?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDE1fHx8ZW58MHx8fHx8"
-        ]
-    )
-    light_position: LightPosition = Field(
-        title="Light Position",
-        description="The direction of the light source.",
+    prompt: str = Field(
+        default="Make this person on the image standing on a ground between flower plants",
+        title="Prompt",
+        description="Text prompt for the image generation.",
     )
 
 # -------------------------------------------------
 # App
 # -------------------------------------------------
-class LightPattern(fal.App):
-    """Light Pattern - Dynamic image relighting with customizable light positions."""
+class ConsistentCharacter(fal.App):
+    """Character Generator - Generate character images with Flux 2 Klein model."""
     
     # Optional: Set explicit app metadata
-    title = "Light Pattern"
-    description = "Dynamic image relighting with customizable light positions"
+    title = "Character Generator"
+    description = "Generate character images using Flux 2 Klein with custom prompts"
 
     image = custom_image
     machine_type = "GPU-H100"
@@ -186,26 +167,22 @@ class LightPattern(fal.App):
             raise RuntimeError("ComfyUI failed to start")
 
     @fal.endpoint("/")
-    def handler(self, input: LightPatternInput):
+    def handler(self, input: CharacterInput):
         try:
             job = copy.deepcopy(WORKFLOW_JSON)
             workflow = job["input"]["workflow"]
 
-            main_img = f"main_{uuid.uuid4().hex}.png"
-            ref_img = f"ref_{uuid.uuid4().hex}.png"
+            input_img = f"input_{uuid.uuid4().hex}.png"
 
             upload_images([
-                {"name": main_img, "image": image_url_to_base64(input.main_image_url)},
-                {"name": ref_img, "image": image_url_to_base64(input.reference_image_url)}
+                {"name": input_img, "image": image_url_to_base64(input.image_url)}
             ])
 
-            workflow["31"]["inputs"]["image"] = main_img
-            workflow["7"]["inputs"]["image"] = ref_img
+            # Update workflow with input image
+            workflow["125"]["inputs"]["image"] = input_img
 
-            # Update prompt with light position
-            light_direction = LIGHT_POSITION_MAP.get(input.light_position, "the front")
-            prompt = f"Relight Figure 1 using the brightness map from Figure 2 (light source from {light_direction})"
-            workflow["11"]["inputs"]["prompt"] = prompt
+            # Update prompt
+            workflow["119"]["inputs"]["text"] = input.prompt
 
             seed_value = random.randint(0, 2**63 - 1)
             apply_fixed_values(workflow, seed_value)
