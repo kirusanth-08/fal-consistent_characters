@@ -15,6 +15,7 @@ import tempfile
 from io import BytesIO
 from PIL import Image as PILImage
 from pydantic import BaseModel, Field
+from typing import Literal
 from comfy_models import MODEL_LIST
 from workflow import WORKFLOW_JSON
 
@@ -26,6 +27,19 @@ dockerfile_path = f"{PWD}/Dockerfile"
 custom_image = ContainerImage.from_dockerfile(dockerfile_path)
 
 COMFY_HOST = "127.0.0.1:8188"
+
+# -------------------------------------------------
+# Resolution Presets
+# -------------------------------------------------
+RESOLUTION_PRESETS = {
+    "hd": {"width": 720, "height": 1280},
+    "square": {"width": 1024, "height": 1024},
+    "squareHD": {"width": 2048, "height": 2048},
+    "portrait_3_4": {"width": 1536, "height": 2048},
+    "portrait_9_16": {"width": 1152, "height": 2048},
+    "landscape_16_9": {"width": 2048, "height": 1152},
+    "landscape_4_3": {"width": 2048, "height": 1536}
+}
 
 
 # -------------------------------------------------
@@ -114,10 +128,10 @@ class CharacterInput(BaseModel):
         title="Input Image",
         description="URL of the character image to process.",
         examples=[
-            "https://images.unsplash.com/photo-1707661553213-df6e18dd54ad?fm=jpg&q=60&w=3000",
-            "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800",
-            "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800",
-            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800"
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/2025_Janhvi_Kapoor_%28cropped%29.jpg/960px-2025_Janhvi_Kapoor_%28cropped%29.jpg",
+            "https://media.istockphoto.com/id/1442495175/photo/beauty-portrait-and-natural-face-of-black-woman-with-healthy-freckle-skin-texture-touch.jpg?s=612x612&w=0&k=20&c=DhKsXATpL5BZbBrSta3O7k2ob4K7yD01zHeKyIZU5XI=",
+            "https://img.freepik.com/free-photo/sensual-woman-looking-front_197531-19790.jpg?semt=ais_hybrid&w=740&q=80",
+            "https://i.pinimg.com/736x/e6/38/5a/e6385af30ce0ec979f87f1176f4a1075.jpg"
         ]
     )
     seed: int = Field(
@@ -125,19 +139,18 @@ class CharacterInput(BaseModel):
         title="Seed",
         description="Random seed for reproducible generation. Use the same seed for consistent results."
     )
-    width: int = Field(
-        ...,
-        title="Width",
-        description="Width of the generated image in pixels. Higher values = better quality but slower.",
-        ge=512,
-        le=4096
-    )
-    height: int = Field(
-        ...,
-        title="Height",
-        description="Height of the generated image in pixels. Higher values = better quality but slower.",
-        ge=512,
-        le=4096
+    resolution: Literal[
+        "hd",
+        "square",
+        "squareHD",
+        "portrait_3_4",
+        "portrait_9_16",
+        "landscape_16_9",
+        "landscape_4_3"
+    ] = Field(
+        default="square",
+        title="Resolution Preset",
+        description="Choose from preset resolutions: hd (720×1280), square (1024×1024), squareHD (2048×2048), portrait_3_4 (1536×2048), portrait_9_16 (1152×2048), landscape_16_9 (2048×1152), landscape_4_3 (2048×1536)",
     )
     nsfw: bool = Field(
         default=False,
@@ -222,9 +235,10 @@ class ConsistentCharacter(fal.App):
             # Update seed (node 109)
             workflow["109"]["inputs"]["noise_seed"] = input.seed
 
-            # Update width and height (node 102)
-            workflow["102"]["inputs"]["width"] = input.width
-            workflow["102"]["inputs"]["height"] = input.height
+            # Get width and height from resolution preset (node 102)
+            resolution = RESOLUTION_PRESETS[input.resolution]
+            workflow["102"]["inputs"]["width"] = resolution["width"]
+            workflow["102"]["inputs"]["height"] = resolution["height"]
 
             # Update NSFW LoRA strength (node 116)
             lora_strength = 1.0 if input.nsfw else 0.0
