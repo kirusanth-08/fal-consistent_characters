@@ -1,0 +1,267 @@
+WORKFLOW_JSON={
+  "input": {
+    "uid": "testUid",
+    "customNodes": [],
+    "customModels": [],
+    "images": [],
+    "workflow": {
+      "1": {
+        "inputs": {
+          "strength": 1,
+          "model": [
+            "2",
+            0
+          ]
+        },
+        "class_type": "CFGNorm",
+        "_meta": {
+          "title": "CFGNorm"
+        }
+      },
+      "2": {
+        "inputs": {
+          "shift": 3,
+          "model": [
+            "20",
+            0
+          ]
+        },
+        "class_type": "ModelSamplingAuraFlow",
+        "_meta": {
+          "title": "ModelSamplingAuraFlow"
+        }
+      },
+      "3": {
+        "inputs": {
+          "prompt": "Dont change the background of the image 1 and dont zoom or change the size of image. Don't change the texture of the image",
+          "clip": [
+            "96",
+            0
+          ],
+          "vae": [
+            "22",
+            0
+          ],
+          "image1": [
+            "39",
+            0
+          ],
+          "image2": [
+            "40",
+            0
+          ]
+        },
+        "class_type": "TextEncodeQwenImageEditPlus",
+        "_meta": {
+          "title": "TextEncodeQwenImageEditPlus"
+        }
+      },
+      "7": {
+        "inputs": {
+          "image": "reference_image"
+        },
+        "class_type": "LoadImage",
+        "_meta": {
+          "title": "Load Image"
+        }
+      },
+      "10": {
+        "inputs": {
+          "pixels": [
+            "39",
+            0
+          ],
+          "vae": [
+            "22",
+            0
+          ]
+        },
+        "class_type": "VAEEncode",
+        "_meta": {
+          "title": "VAE Encode"
+        }
+      },
+      "11": {
+        "inputs": {
+          "prompt": "Relight Figure 1 using the brightness map from Figure 2 (light source from the front)",
+          "clip": [
+            "96",
+            0
+          ],
+          "vae": [
+            "22",
+            0
+          ],
+          "image1": [
+            "39",
+            0
+          ],
+          "image2": [
+            "40",
+            0
+          ]
+        },
+        "class_type": "TextEncodeQwenImageEditPlus",
+        "_meta": {
+          "title": "TextEncodeQwenImageEditPlus"
+        }
+      },
+      "12": {
+        "inputs": {
+          "samples": [
+            "14",
+            0
+          ],
+          "vae": [
+            "22",
+            0
+          ]
+        },
+        "class_type": "VAEDecode",
+        "_meta": {
+          "title": "VAE Decode"
+        }
+      },
+      "14": {
+        "inputs": {
+          "seed": 452037337342133,
+          "steps": 8,
+          "cfg": 1,
+          "sampler_name": "euler",
+          "scheduler": "simple",
+          "denoise": 1,
+          "model": [
+            "1",
+            0
+          ],
+          "positive": [
+            "11",
+            0
+          ],
+          "negative": [
+            "3",
+            0
+          ],
+          "latent_image": [
+            "10",
+            0
+          ]
+        },
+        "class_type": "KSampler",
+        "_meta": {
+          "title": "KSampler"
+        }
+      },
+      "20": {
+        "inputs": {
+          "lora_name": "Qwen-Image-Lightning-8steps-V2.0.safetensors",
+          "strength_model": 1,
+          "model": [
+            "77",
+            0
+          ]
+        },
+        "class_type": "LoraLoaderModelOnly",
+        "_meta": {
+          "title": "LoraLoaderModelOnly"
+        }
+      },
+      "22": {
+        "inputs": {
+          "vae_name": "qwen_image_vae.safetensors"
+        },
+        "class_type": "VAELoader",
+        "_meta": {
+          "title": "Load VAE"
+        }
+      },
+      "31": {
+        "inputs": {
+          "image": "main_image"
+        },
+        "class_type": "LoadImage",
+        "_meta": {
+          "title": "Load Image"
+        }
+      },
+      "39": {
+        "inputs": {
+          "upscale_method": "lanczos",
+          "megapixels": 1,
+          "resolution_steps": 1,
+          "image": [
+            "31",
+            0
+          ]
+        },
+        "class_type": "ImageScaleToTotalPixels",
+        "_meta": {
+          "title": "ImageScaleToTotalPixels"
+        }
+      },
+      "40": {
+        "inputs": {
+          "upscale_method": "lanczos",
+          "megapixels": 1,
+          "resolution_steps": 1,
+          "image": [
+            "7",
+            0
+          ]
+        },
+        "class_type": "ImageScaleToTotalPixels",
+        "_meta": {
+          "title": "ImageScaleToTotalPixels"
+        }
+      },
+      "77": {
+        "inputs": {
+          "lora_name": "iclight_sd15_fc.safetensors",
+          "strength_model": 1,
+          "model": [
+            "94",
+            0
+          ]
+        },
+        "class_type": "LoraLoaderModelOnly",
+        "_meta": {
+          "title": "LoraLoaderModelOnly"
+        }
+      },
+      "94": {
+        "inputs": {
+          "unet_name": "Qwen-Image-Edit-2509_fp8_e4m3fn.safetensors",
+          "weight_dtype": "default"
+        },
+        "class_type": "UNETLoader",
+        "_meta": {
+          "title": "Load Diffusion Model"
+        }
+      },
+      "96": {
+        "inputs": {
+          "clip_name": "qwen_2.5_vl_7b.safetensors",
+          "type": "stable_diffusion",
+          "device": "default"
+        },
+        "class_type": "CLIPLoader",
+        "_meta": {
+          "title": "Load CLIP"
+        }
+      },
+      "106": {
+        "inputs": {
+          "filename_prefix": "ComfyUI",
+          "images": [
+            "12",
+            0
+          ]
+        },
+        "class_type": "SaveImage",
+        "_meta": {
+          "title": "Save Image"
+        }
+      }
+    }
+  }
+}
