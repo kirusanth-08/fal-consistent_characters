@@ -161,7 +161,7 @@ class CharacterInput(BaseModel):
 # -------------------------------------------------
 # App
 # -------------------------------------------------
-class ConsistentCharacter(fal.App):
+class KoraEdit(fal.App):
     """Character Generator - Generate character images with Flux 2 Klein model."""
     
     # Optional: Set explicit app metadata
