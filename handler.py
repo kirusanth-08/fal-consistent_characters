@@ -1,6 +1,7 @@
 import fal
 from fal.container import ContainerImage
 from fal.toolkit.image import Image
+from fastapi import Request
 from pathlib import Path
 import json
 import uuid
@@ -15,7 +16,7 @@ import tempfile
 from io import BytesIO
 from PIL import Image as PILImage
 from pydantic import BaseModel, Field
-from typing import Literal
+from typing import Literal, Dict, Any
 from comfy_models import MODEL_LIST
 from workflow import WORKFLOW_JSON
 
@@ -157,18 +158,23 @@ class CharacterInput(BaseModel):
     )
 
 # -------------------------------------------------
+# Output Model
+# -------------------------------------------------
+class CharacterOutput(BaseModel):
+    status: str = Field(description="Status of the generation")
+    images: list[Image] = Field(description="Generated images")
+    seed: int = Field(description="Seed used for generation")
+
+# -------------------------------------------------
 # App
 # -------------------------------------------------
 class KoraEdit(fal.App):
     """Character Generator - Generate character images with Flux 2 Klein model."""
     
-    # Optional: Set explicit app metadata
-    title = "Character Generator"
-    description = "Generate character images using Flux 2 Klein with custom prompts"
-
     image = custom_image
     machine_type = "GPU-H100"
     max_concurrency = 5
+    keep_alive = 300  # Keep container alive for 5 minutes
     requirements = ["websockets", "websocket-client"]
 
     # 🔒 CRITICAL
@@ -212,8 +218,9 @@ class KoraEdit(fal.App):
         if not check_server(f"http://{COMFY_HOST}/system_stats"):
             raise RuntimeError("ComfyUI failed to start")
 
-    @fal.endpoint("/")
-    def handler(self, input: CharacterInput):
+    @fal.endpoint("/generate")
+    def generate(self, input: CharacterInput, request: Request) -> Dict[str, Any]:
+        """Generate character image based on input parameters."""
         try:
             job = copy.deepcopy(WORKFLOW_JSON)
             workflow = job["input"]["workflow"]
@@ -293,19 +300,15 @@ class KoraEdit(fal.App):
                         f"&type={img['type']}"
                     )
                     r = requests.get(f"http://{COMFY_HOST}/view?{params}")
-                    # Save to temp file and use Image.from_path for better compatibility
+                    # Save to temp file and use Image.from_path with request for proper metadata
                     temp_path = f"/tmp/output_{uuid.uuid4().hex}.png"
                     with open(temp_path, "wb") as f:
                         f.write(r.content)
-                    try:
-                        images.append(Image.from_path(temp_path))
-                    except Exception as upload_err:
-                        print(f"Image upload warning: {upload_err}")
-                        # Fallback: try with explicit repository parameter
-                        images.append(Image.from_path(temp_path, repository="cdn"))
+                    # Pass request parameter for proper fal playground metadata
+                    images.append(Image.from_path(temp_path, request=request))
 
             ws.close()
-            return {"status": "success", "images": images}
+            return {"status": "success", "images": images, "seed": input.seed}
 
         except Exception as e:
             traceback.print_exc()

@@ -80,8 +80,7 @@ RUN rm -rf /comfyui/custom_nodes/ComfyUI-Manager && \
 # ---------------------------------------------------------
 RUN pip install --no-cache-dir \
     boto3==1.35.74 \
-    protobuf==4.25.1 \
-    pydantic==2.10.6
+    protobuf==4.25.1
 
 ENV HF_HOME=/fal-volume/models/huggingface
 
