@@ -1,7 +1,7 @@
 import fal
 from fal.container import ContainerImage
-from fal.toolkit.image import Image
-from fastapi import Request
+from fal.toolkit import Image
+from fastapi import Request, Response
 from pathlib import Path
 import json
 import uuid
@@ -16,7 +16,7 @@ import tempfile
 from io import BytesIO
 from PIL import Image as PILImage
 from pydantic import BaseModel, Field
-from typing import Literal, Dict, Any
+from typing import Literal
 from comfy_models import MODEL_LIST
 from workflow import WORKFLOW_JSON
 
@@ -161,20 +161,40 @@ class CharacterInput(BaseModel):
 # Output Model
 # -------------------------------------------------
 class CharacterOutput(BaseModel):
-    status: str = Field(description="Status of the generation")
-    images: list[Image] = Field(description="Generated images")
-    seed: int = Field(description="Seed used for generation")
+    """Output model for character generation."""
+    images: list[Image] = Field(
+        description="The generated image files info.",
+        examples=[
+            [
+                Image(
+                    url="https://fal.media/files/example/character.png",
+                    width=1024,
+                    height=1024,
+                    content_type="image/png",
+                )
+            ]
+        ],
+    )
+    seed: int = Field(
+        description="Seed of the generated image. Same value as input or randomly generated."
+    )
+    prompt: str = Field(
+        description="The prompt used for generating the image."
+    )
 
 # -------------------------------------------------
-# App
+# App - NEW FORMAT with parameters in class declaration
 # -------------------------------------------------
-class KoraEdit(fal.App):
+class KoraEdit(
+    fal.App,
+    keep_alive=300,
+    min_concurrency=0,
+    max_concurrency=5,
+):
     """Character Generator - Generate character images with Flux 2 Klein model."""
     
     image = custom_image
     machine_type = "GPU-H100"
-    max_concurrency = 5
-    keep_alive = 300  # Keep container alive for 5 minutes
     requirements = ["websockets", "websocket-client"]
 
     # 🔒 CRITICAL
@@ -218,8 +238,12 @@ class KoraEdit(fal.App):
         if not check_server(f"http://{COMFY_HOST}/system_stats"):
             raise RuntimeError("ComfyUI failed to start")
 
-    @fal.endpoint("/generate")
-    def generate(self, input: CharacterInput, request: Request) -> Dict[str, Any]:
+    @fal.endpoint("/")
+    async def generate(
+        self, 
+        input: CharacterInput, 
+        response: Response
+    ) -> CharacterOutput:
         """Generate character image based on input parameters."""
         try:
             job = copy.deepcopy(WORKFLOW_JSON)
@@ -300,16 +324,25 @@ class KoraEdit(fal.App):
                         f"&type={img['type']}"
                     )
                     r = requests.get(f"http://{COMFY_HOST}/view?{params}")
-                    # Save to temp file and use Image.from_path with request for proper metadata
-                    temp_path = f"/tmp/output_{uuid.uuid4().hex}.png"
-                    with open(temp_path, "wb") as f:
-                        f.write(r.content)
-                    # Pass request parameter for proper fal playground metadata
-                    images.append(Image.from_path(temp_path, request=request))
+                    # Convert to PIL Image and use Image.from_pil (modern fal toolkit pattern)
+                    pil_image = PILImage.open(BytesIO(r.content))
+                    images.append(Image.from_pil(pil_image, format="png"))
 
             ws.close()
-            return {"status": "success", "images": images, "seed": input.seed}
+            
+            # Set billing units based on resolution (optional but recommended)
+            resolution = RESOLUTION_PRESETS[input.resolution]
+            resolution_factor = (resolution["width"] * resolution["height"]) / (1024 * 1024)
+            response.headers["x-fal-billable-units"] = str(int(resolution_factor))
+            
+            return CharacterOutput(
+                images=images, 
+                seed=input.seed,
+                prompt=input.prompt
+            )
 
         except Exception as e:
             traceback.print_exc()
-            return {"error": str(e)}
+            # Re-raise as HTTPException for proper error handling
+            from fastapi import HTTPException
+            raise HTTPException(status_code=500, detail=str(e))
