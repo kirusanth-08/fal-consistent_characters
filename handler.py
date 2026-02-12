@@ -156,30 +156,21 @@ class CharacterInput(BaseModel):
         title="NSFW Mode",
         description="Enable NSFW content generation. If false, NSFW LoRA strength is set to 0."
     )
-    num_images: int = Field(
-        default=1,
-        title="Number of Images",
-        description="Number of images to generate in one request.",
-        ge=1,
-        le=10,
-    )
 
 # -------------------------------------------------
 # Output Model
 # -------------------------------------------------
 class CharacterOutput(BaseModel):
     """Output model for character generation."""
-    images: list[Image] = Field(
-        description="The generated image files info.",
+    image: Image = Field(
+        description="The generated image file info.",
         examples=[
-            [
-                Image(
-                    url="https://fal.media/files/example/character.png",
-                    width=1024,
-                    height=1024,
-                    content_type="image/png",
-                )
-            ]
+            Image(
+                url="https://fal.media/files/example/character.png",
+                width=1024,
+                height=1024,
+                content_type="image/png",
+            )
         ],
     )
     seed: int = Field(
@@ -275,7 +266,6 @@ class KoraEdit(
             resolution = RESOLUTION_PRESETS[input.resolution]
             workflow["102"]["inputs"]["width"] = resolution["width"]
             workflow["102"]["inputs"]["height"] = resolution["height"]
-            workflow["102"]["inputs"]["batch_size"] = input.num_images
 
             # Update NSFW LoRA strength (node 116)
             lora_strength = 1.0 if input.nsfw else 0.0
@@ -327,7 +317,8 @@ class KoraEdit(
                 f"http://{COMFY_HOST}/history/{prompt_id}"
             ).json()
 
-            images = []
+            # Get the first image from outputs
+            output_image = None
             for node in history[prompt_id]["outputs"].values():
                 for img in node.get("images", []):
                     params = (
@@ -338,17 +329,20 @@ class KoraEdit(
                     r = requests.get(f"http://{COMFY_HOST}/view?{params}")
                     # Convert to PIL Image and use Image.from_pil (modern fal toolkit pattern)
                     pil_image = PILImage.open(BytesIO(r.content))
-                    images.append(Image.from_pil(pil_image, format="png"))
+                    output_image = Image.from_pil(pil_image, format="png")
+                    break
+                if output_image:
+                    break
 
             ws.close()
             
-            # Set billing units based on resolution and number of images
+            # Set billing units based on resolution
             resolution = RESOLUTION_PRESETS[input.resolution]
             resolution_factor = (resolution["width"] * resolution["height"]) / (1024 * 1024)
-            response.headers["x-fal-billable-units"] = str(int(resolution_factor * input.num_images))
+            response.headers["x-fal-billable-units"] = str(int(resolution_factor))
             
             return CharacterOutput(
-                images=images, 
+                image=output_image, 
                 seed=input.seed,
                 prompt=input.prompt
             )
