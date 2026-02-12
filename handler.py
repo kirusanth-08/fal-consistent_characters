@@ -188,8 +188,9 @@ class KoraEdit(
     keep_alive=300,
     min_concurrency=0,
     max_concurrency=5,
+    name="kora-edit",
 ):
-    """Character Generator - Generate character images with Flux 2 Klein model."""
+    """Kora Edit - Edit character images."""
     
     image = custom_image
     machine_type = "GPU-H100"
