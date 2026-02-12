@@ -115,8 +115,8 @@ class CharacterInput(BaseModel):
         title="Prompt",
         description="Text prompt for the image generation.",
         examples=[
-            "Make this person on the image standing on a ground between flower plants",
             "This character sitting on a modern office chair in a bright workspace",
+            "Make this person on the image standing on a ground between flower plants",
             "The person walking on a beach during sunset with waves in the background",
             "This individual standing in front of a futuristic cityscape at night",
             "The character posing in a studio with professional lighting and white background",
@@ -128,10 +128,8 @@ class CharacterInput(BaseModel):
         title="Input Image",
         description="URL of the character image to process.",
         examples=[
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/2025_Janhvi_Kapoor_%28cropped%29.jpg/960px-2025_Janhvi_Kapoor_%28cropped%29.jpg",
             "https://media.istockphoto.com/id/1442495175/photo/beauty-portrait-and-natural-face-of-black-woman-with-healthy-freckle-skin-texture-touch.jpg?s=612x612&w=0&k=20&c=DhKsXATpL5BZbBrSta3O7k2ob4K7yD01zHeKyIZU5XI=",
             "https://img.freepik.com/free-photo/sensual-woman-looking-front_197531-19790.jpg?semt=ais_hybrid&w=740&q=80",
-            "https://i.pinimg.com/736x/e6/38/5a/e6385af30ce0ec979f87f1176f4a1075.jpg"
         ]
     )
     seed: int = Field(
