@@ -135,7 +135,7 @@ class CharacterInput(BaseModel):
         ]
     )
     seed: int = Field(
-        ...,
+        default_factory=lambda: random.randint(0, 2**32 - 1),
         title="Seed",
         description="Random seed for reproducible generation. Use the same seed for consistent results."
     )
@@ -268,7 +268,17 @@ class KoraEdit(fal.App):
                 # Ensure proper decoding: handle both string and bytes
                 if isinstance(out, bytes):
                     out = out.decode('utf-8')
-                msg = json.loads(out)
+                
+                # Skip empty messages
+                if not out or not out.strip():
+                    continue
+                
+                try:
+                    msg = json.loads(out)
+                except json.JSONDecodeError as je:
+                    print(f"Warning: Failed to parse WebSocket message: {out[:100]}")
+                    continue
+                
                 if msg.get("type") == "executing" and msg["data"]["node"] is None:
                     break
 
