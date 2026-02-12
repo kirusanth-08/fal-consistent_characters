@@ -156,6 +156,13 @@ class CharacterInput(BaseModel):
         title="NSFW Mode",
         description="Enable NSFW content generation. If false, NSFW LoRA strength is set to 0."
     )
+    num_images: int = Field(
+        default=1,
+        title="Number of Images",
+        description="Number of images to generate in one request.",
+        ge=1,
+        le=10,
+    )
 
 # -------------------------------------------------
 # Output Model
@@ -268,6 +275,7 @@ class KoraEdit(
             resolution = RESOLUTION_PRESETS[input.resolution]
             workflow["102"]["inputs"]["width"] = resolution["width"]
             workflow["102"]["inputs"]["height"] = resolution["height"]
+            workflow["102"]["inputs"]["batch_size"] = input.num_images
 
             # Update NSFW LoRA strength (node 116)
             lora_strength = 1.0 if input.nsfw else 0.0
@@ -330,10 +338,10 @@ class KoraEdit(
 
             ws.close()
             
-            # Set billing units based on resolution (optional but recommended)
+            # Set billing units based on resolution and number of images
             resolution = RESOLUTION_PRESETS[input.resolution]
             resolution_factor = (resolution["width"] * resolution["height"]) / (1024 * 1024)
-            response.headers["x-fal-billable-units"] = str(int(resolution_factor))
+            response.headers["x-fal-billable-units"] = str(int(resolution_factor * input.num_images))
             
             return CharacterOutput(
                 images=images, 
