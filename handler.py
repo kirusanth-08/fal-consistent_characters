@@ -306,14 +306,18 @@ class KoraEdit(
                 if isinstance(out, bytes):
                     out = out.decode('utf-8')
                 
-                # Skip empty messages
+                # Skip empty messages or non-JSON text (progress updates, debug info)
                 if not out or not out.strip():
+                    continue
+                
+                # Only process JSON messages, silently skip text messages
+                if not out.strip().startswith('{'):
                     continue
                 
                 try:
                     msg = json.loads(out)
-                except json.JSONDecodeError as je:
-                    print(f"Warning: Failed to parse WebSocket message: {out[:100]}")
+                except json.JSONDecodeError:
+                    # Skip malformed messages without logging
                     continue
                 
                 if msg.get("type") == "executing" and msg["data"]["node"] is None:
