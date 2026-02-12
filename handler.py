@@ -264,7 +264,11 @@ class KoraEdit(fal.App):
             prompt_id = resp.json()["prompt_id"]
 
             while True:
-                msg = json.loads(ws.recv())
+                out = ws.recv()
+                # Ensure proper decoding: handle both string and bytes
+                if isinstance(out, bytes):
+                    out = out.decode('utf-8')
+                msg = json.loads(out)
                 if msg.get("type") == "executing" and msg["data"]["node"] is None:
                     break
 
